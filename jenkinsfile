@@ -11,12 +11,12 @@ pipeline {
         }
         stage('build') {
             steps {
-                sh 'docker build -t ${env.IMAGE_NAME}'
+                sh "docker build -t ${env.IMAGE_NAME} ."
             }
         }
         stage('run') {
             steps {
-                sh 'docker run -d -p 3000:3000 ${env.IMAGE_NAME}'
+                sh "docker run -d -p 3000:3000 ${env.IMAGE_NAME}"
             }
         }
         stage('list') {
