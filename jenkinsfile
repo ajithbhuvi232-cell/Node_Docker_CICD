@@ -16,16 +16,6 @@ pipeline {
                 sh "docker build -t ${env.IMAGE_NAME} ."
             }
         }
-        stage('run') {
-            steps {
-                sh "docker run -d -p 3000:3000 ${env.IMAGE_NAME}"
-            }
-        }
-        stage('list') {
-            steps {
-                sh 'docker images'
-            }
-        }
         stage('push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: env.DOCKERHUB_CREDENTIALS, usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
