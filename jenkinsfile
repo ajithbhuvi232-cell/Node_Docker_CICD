@@ -1,38 +1,59 @@
 pipeline {
     agent any
+
     environment {
-        IMAGE_NAME =  'nodeapp:1.0.0'
+        IMAGE_NAME = 'nodeapp:1.0.0'
         DOCKERHUB_CREDENTIALS = 'dockerhub_token'
         DOCKERHUB_REPOSITORY = 'ajithkumar0104/cicd_repo'
+        CONTAINER_NAME = 'nodeappcontainer1'
     }
+
     stages {
+
         stage('checkout') {
             steps {
-                git branch: 'main', url:'https://github.com/ajithbhuvi232-cell/Node_Docker_CICD.git'
+                git branch: 'main', url: 'https://github.com/ajithbhuvi232-cell/Node_Docker_CICD.git'
             }
         }
+
+        stage('cleanup old container') {
+            steps {
+                sh 'docker stop $CONTAINER_NAME || true'
+                sh 'docker rm $CONTAINER_NAME || true'
+            }
+        }
+
+        stage('cleanup old image') {
+            steps {
+                sh 'docker rmi $IMAGE_NAME || true'
+            }
+        }
+
         stage('build') {
             steps {
-                sh "docker build -t ${env.IMAGE_NAME} ."
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
+
         stage('push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: env.DOCKERHUB_CREDENTIALS, usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                    sh "echo ${DOCKERHUB_PASSWORD} | docker login -u ${DOCKERHUB_USERNAME} --password-stdin"
-                    sh "docker tag ${env.IMAGE_NAME} ${env.DOCKERHUB_REPOSITORY}:latest"
-                    sh "docker push ${env.DOCKERHUB_REPOSITORY}:latest"
+                    sh 'echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin'
+                    sh 'docker tag $IMAGE_NAME $DOCKERHUB_REPOSITORY:latest'
+                    sh 'docker push $DOCKERHUB_REPOSITORY:latest'
                 }
             }
         }
+
         stage('pull') {
             steps {
-                sh "docker pull ${env.DOCKERHUB_REPOSITORY}:latest"
+                sh 'docker pull $DOCKERHUB_REPOSITORY:latest'
             }
         }
+
         stage('deploy') {
             steps {
-                sh "docker run -d -p 3000:3000 --name nodeappcontainer1 ${env.DOCKERHUB_REPOSITORY}:latest ${env.DOCKERHUB_REPOSITORY}:latest"
+                sh 'docker run -d -p 3000:3000 --name $CONTAINER_NAME $DOCKERHUB_REPOSITORY:latest'
             }
         }
     }
