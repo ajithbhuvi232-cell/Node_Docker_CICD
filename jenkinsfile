@@ -2,6 +2,8 @@ pipeline {
     agent any
     environment {
         IMAGE_NAME =  'nodeapp:1.0.0'
+        DOCKERHUB_CREDENTIALS = 'dockerhub_token'
+        DOCKERHUB_REPOSITORY = 'ajithkumar0104/cicd_repo'
     }
     stages {
         stage('checkout') {
@@ -22,6 +24,15 @@ pipeline {
         stage('list') {
             steps {
                 sh 'docker images'
+            }
+        }
+        stage('push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: env.DOCKERHUB_CREDENTIALS, usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                    sh "echo ${DOCKERHUB_PASSWORD} | docker login -u ${DOCKERHUB_USERNAME} --password-stdin"
+                    sh "docker tag ${env.IMAGE_NAME} ${env.DOCKERHUB_REPOSITORY}:latest"
+                    sh "docker push ${env.DOCKERHUB_REPOSITORY}:latest"
+                }
             }
         }
     }
