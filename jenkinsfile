@@ -25,5 +25,15 @@ pipeline {
                 }
             }
         }
+        stage('pull') {
+            steps {
+                sh "docker pull ${env.DOCKERHUB_REPOSITORY}:latest"
+            }
+        }
+        stage('deploy') {
+            steps {
+                sh "docker run -d -p 3000:3000 --name nodeappcontainer ${env.DOCKERHUB_REPOSITORY}:latest ${env.DOCKERHUB_REPOSITORY}:latest"
+            }
+        }
     }
 }
