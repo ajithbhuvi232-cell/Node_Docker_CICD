@@ -3,7 +3,7 @@ pipeline {
     environment {
         IMAGE_NAME =  'nodeapp:1.0.0'
     }
-    Stages {
+    stages {
         stage('checkout') {
             steps {
                 git branch: 'main', url:'https://github.com/ajithbhuvi232-cell/Node_Docker_CICD.git'
